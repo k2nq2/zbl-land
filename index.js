@@ -114,50 +114,47 @@ const items = document.querySelectorAll('.c2-num-item');
 const section = document.querySelector('.c2-num-wrapper');
 
 const remToPx = rem => rem * parseFloat(getComputedStyle(document.documentElement).fontSize);
-const mobileOffset = remToPx(40);  // 10rem
+const mobileOffset = remToPx(40);
 
 const isMobile = window.matchMedia("(max-width: 768px)").matches;
 
+const animateItems = () => {
+  items.forEach((item, index) => {
+    setTimeout(() => {
+      item.classList.add('visible');
+    }, index * 300);
+  });
+};
+
+const resetItems = () => {
+  items.forEach(item => {
+    item.classList.remove('visible');
+  });
+};
+
 if (isMobile) {
-  let animationStarted = false;
-
-  const tryAnimate = () => {
-    if (animationStarted) return;
-
-    const rect = section.getBoundingClientRect();
-    if (rect.top <= mobileOffset) {
-      animationStarted = true;
-      items.forEach((item, index) => {
-        setTimeout(() => {
-          item.classList.add('visible');
-        }, index * 300);
-      });
-      window.removeEventListener('scroll', tryAnimate);
-      observerMobile.unobserve(section);
-    }
-  };
-
   const observerMobile = new IntersectionObserver(entries => {
     entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        tryAnimate();
+      const rect = section.getBoundingClientRect();
+      const isAboveOffset = rect.top <= mobileOffset;
+
+      if (entry.isIntersecting && isAboveOffset) {
+        animateItems();
+      } else {
+        resetItems();
       }
     });
   }, { threshold: 0 });
 
   observerMobile.observe(section);
 
-  window.addEventListener('scroll', tryAnimate);
 } else {
   const observerDesktop = new IntersectionObserver(entries => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
-        items.forEach((item, index) => {
-          setTimeout(() => {
-            item.classList.add('visible');
-          }, index * 300);
-        });
-        observerDesktop.unobserve(entry.target);
+        animateItems();
+      } else {
+        resetItems();
       }
     });
   }, {
@@ -174,7 +171,8 @@ const observerUp = new IntersectionObserver((entries) => {
   entries.forEach(entry => {
     if (entry.isIntersecting) {
       entry.target.classList.add('visible');
-      observerUp.unobserve(entry.target);
+    } else {
+      entry.target.classList.remove('visible');
     }
   });
 }, { threshold: 0.2 });
@@ -191,9 +189,12 @@ const anotherObserver = new IntersectionObserver(entries => {
       anotherItems.forEach((item, index) => {
         setTimeout(() => {
           item.classList.add('visible');
-        }, index * 300); // Задержка между айтемами 300мс
+        }, index * 300); // Задержка между элементами
       });
-      anotherObserver.unobserve(entry.target); // Останавливаем наблюдение после показа
+    } else {
+      anotherItems.forEach(item => {
+        item.classList.remove('visible');
+      });
     }
   });
 }, {
@@ -213,7 +214,7 @@ function animateCounter(counter, target) {
   return new Promise((resolve) => {
     let current = 0;
     const duration = 1200;
-    const stepTime = Math.abs(Math.floor(duration / target));
+    const stepTime = Math.max(Math.floor(duration / target), 20); // Защита от слишком маленьких интервалов
 
     counter.textContent = '0';
 
@@ -233,14 +234,13 @@ const counterObserver = new IntersectionObserver(entries => {
   entries.forEach(async (entry) => {
     if (entry.isIntersecting) {
       for (let i = 0; i < counters.length; i++) {
-        // Сбрасываем в 0 только те, которые идут после текущего
-        for (let j = i + 1; j < counters.length; j++) {
-          counters[j].textContent = '0';
-        }
-
         await animateCounter(counters[i], targets[i]);
       }
-      counterObserver.unobserve(entry.target);
+    } else {
+      // Сброс значений при выходе
+      counters.forEach(counter => {
+        counter.textContent = '0';
+      });
     }
   });
 }, { threshold: 0.5 });
@@ -249,19 +249,16 @@ counterObserver.observe(countersSection);
 
 
 const svgElement = document.querySelector('svg.arrow');
-let animationStarted = false;
 
 const svgObserver = new IntersectionObserver(entries => {
   entries.forEach(entry => {
-    if (entry.isIntersecting && !animationStarted) {
-      animationStarted = true;
+    if (entry.isIntersecting) {
       for (let i = 1; i <= 4; i++) {
         const anim = document.getElementById(`anim${i}`);
         if (anim) {
           anim.beginElement();
         }
       }
-      svgObserver.unobserve(entry.target);
     }
   });
 }, { threshold: 0.3 });
