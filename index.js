@@ -175,7 +175,10 @@ const observerUp = new IntersectionObserver((entries) => {
       entry.target.classList.remove('visible');
     }
   });
-}, { threshold: 0.2 });
+}, { 
+  threshold: 0.3,
+  rootMargin: '0px 0px -10% 0px'
+});
 
 const aboutBlock = document.querySelector('.c3-section');
 observerUp.observe(aboutBlock);
