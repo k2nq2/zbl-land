@@ -270,11 +270,32 @@ svgObserver.observe(svgElement);
 
 
 
+const itMobile = window.matchMedia("(hover: none)").matches;
+
 document.querySelectorAll('.c4-item').forEach(wrapper => {
   const video = wrapper.querySelector('.hover-video');
-  wrapper.addEventListener('mouseenter', () => video.play());
-  wrapper.addEventListener('mouseleave', () => {
-    video.pause();
+
+  if (itMobile) {
+    // Mobile logic
+    let isPlaying = false;
+    wrapper.addEventListener('click', () => {
+      if (isPlaying) {
+        video.pause();
+        video.currentTime = 0;
+      } else {
+        video.play();
+      }
+      isPlaying = !isPlaying;
+    });
+  } else {
+    // Desktop hover
+    wrapper.addEventListener('mouseenter', () => video.play());
+    wrapper.addEventListener('mouseleave', () => {
+      video.pause();
+      video.currentTime = 0;
+    });
+  }
+});
     video.currentTime = 0;
   });
 });
