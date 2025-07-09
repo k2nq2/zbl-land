@@ -334,7 +334,16 @@ ul {
   gap: 1.875rem; /* 30px */
   align-items: center;
 }
-
+.header-bottom-item img{
+  width: 6.85rem;
+  height: 6.85rem;
+}
+@media (max-width: 600px) {
+  .header-bottom-item img{
+  width: 7rem;
+  height: 7rem;
+}
+}
 .header-bottom-item p {
   font-family: var(--font-family);
   font-weight: 400;
